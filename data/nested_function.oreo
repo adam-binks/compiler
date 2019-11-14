@@ -1,0 +1,15 @@
+program test
+
+begin
+
+    procedure add(var x, var y) begin
+        var x := 2;
+
+        procedure nested_procedures_is_illegal() begin
+            var y := 2;
+        end
+
+        return x + y;
+    end
+
+end

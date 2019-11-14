@@ -1,0 +1,12 @@
+program test
+
+begin
+
+    var y := 50;
+
+    if (true and 2 >= 6 * 7) then
+    begin
+        println "success";
+    end;
+
+end

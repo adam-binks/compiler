@@ -1,0 +1,18 @@
+program test
+
+begin
+
+    var y := 50;
+    var x := false;
+    var mybool;
+
+    var expression := 2 + (get_num() * 2) + y;
+
+    if (true and 2 >= 6 * 7 or 200 > y) then
+    begin
+        println "success";
+    end;
+
+    mybool := y == 50 and x == not true;
+
+end

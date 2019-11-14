@@ -1,0 +1,30 @@
+p -> "PROGRAM" "ID" compound
+compound -> "BEGIN" statement statement* "END"
+statement -> v | pr | w | i | a | function_definition | function_call
+v -> "VAR" "ID" var_assign ";"
+var_assign -> ":=" expression | ε
+pr -> "PRINT" expression ";" | "PRINTLN" expression ";" | "GET" "ID" ";"
+w -> "WHILE" "(" bool ")" compound ";"
+i -> "IF" "(" bool ")" "THEN" compound optional_else ";"
+optional_else -> "ELSE" compound | ε
+a -> "ID" ":=" expression ";"
+function_call -> "ID_PAREN" parameters ")" ";"
+function_definition -> "PROCEDURE" "ID_PAREN" func_def_args ")" function_compound
+func_def_args -> "VAR" "ID" later_func_def_arg | ε
+later_func_def_arg -> "," "VAR" "ID" later_func_def_arg | ε
+function_compound -> "BEGIN" function_statement function_statement* "END"
+function_statement -> v | pr | w | i | a | return_statement | function_call
+return_statement -> "RETURN" optional_expr ";"
+optional_expr -> expression | ε
+relative_operator -> "<" | ">" | "==" | ">=" | "<="
+expression -> simple_expr comp_e and_or_b
+comp_e -> relative_operator expression comp_e | ε
+simple_expr -> term add_sub*
+add_sub -> "+" term | "-" term
+term -> factor mul_div*
+mul_div -> "*" factor | "/" factor
+factor -> "NUMBER" | "STRING" | "ID" | "ID_PAREN" parameters ")" | "TRUE" and_or_b | "FALSE" and_or_b | "(" expression ")" | "NOT" bool
+parameters -> expression later_parameters | ε
+later_parameters -> "," expression later_parameters | ε
+bool -> "TRUE" and_or_b | "FALSE" and_or_b | "NOT" bool | simple_expr relative_operator expression
+and_or_b -> "AND" bool | "OR" bool | ε

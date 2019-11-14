@@ -1,0 +1,11 @@
+program test
+
+begin
+
+    var y := 50;
+    var x := false;
+    var mybool;
+
+    var foo := "string" true;
+
+end

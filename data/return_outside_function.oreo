@@ -1,0 +1,15 @@
+program test
+
+begin
+
+    procedure add(var x, var y) begin
+        return x + y;
+    end
+
+    procedure print_something()
+    begin
+        print 2 + 2;
+    end
+
+    return "this should not work";
+end
