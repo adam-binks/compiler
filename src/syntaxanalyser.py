@@ -71,7 +71,62 @@ class ParseTreeNode:
             self.level = 0
 
     def __repr__(self):
-        return repr(self.content)
+        result = " " + repr(self.result) if hasattr(self, "result") else ""
+        return repr(self.content) + result
+
+    def is_non_terminal(self, s: str):
+        return isinstance(self.content, NonTerminal) and self.content.name == s
+
+    def is_terminal(self, s: str):
+        return isinstance(self.content, Terminal) and self.content.token.name == s
+
+    def is_in(self, names: List[str]):
+        if isinstance(self.content, NonTerminal):
+            return self.content.name in names
+        else:
+            return self.content.token.name in names
+
+    def get_terminal_attribute(self):
+        return self.content.token.attribute
+
+    def get_child(self, name, optional=False):
+        for child in self.children:
+            if child.is_non_terminal(name) or child.is_terminal(name):
+                return child
+
+        if not optional:
+            raise ValueError(f"{self} has missing child {name}")
+
+        return None
+
+    # get the first child in names which this node has
+    def get_a_child(self, names, optional=False):
+        for n in names:
+            if self.has_child(n):
+                return self.get_child(n)
+
+        if optional:
+            return None
+        else:
+            raise ValueError(f"{self} has none of the children {names}")
+
+    def has_a_child(self, names):
+        return any([self.has_child(n) for n in names])
+
+    def has_child(self, name):
+        return self.get_child(name, optional=True) is not None
+
+    # returns the closest common parent of this node and other node
+    def get_common_parent(self, other):
+        my_p = self
+        other_p = other
+        while True:
+            while other_p is not None:
+                if my_p == other_p:
+                    return my_p
+                other_p = other_p.parent
+            my_p = my_p.parent
+            other_p = other
 
     def parse_tokens(self, tokens: List[Token], expansions):
         prev_token = None
@@ -153,7 +208,7 @@ class ParseTreeNode:
             self.children = [ParseTreeNode(copy.deepcopy(x), parent=self) for x in expansion.rhs]
             self.children[0].content.token = tokens[0]
 
-    def get_pretty_print_string(self):
+    def get_pretty_print_string(self, print_scope=False, print_type=False):
         output = []
         line = YELLOW
         edges_line = BLUE
@@ -174,7 +229,8 @@ class ParseTreeNode:
                 while len(line) < node.parent.left_col:
                     line += " "
 
-            edges_line, line = self._update_line_and_edge_line(edges_line, line, node, prev_node)
+            edges_line, line = self._update_line_and_edge_line(edges_line, line, node, prev_node, print_scope,
+                                                               print_type)
 
             prev_node = node
 
@@ -183,14 +239,16 @@ class ParseTreeNode:
 
         return "\n".join(output)
 
-    def _update_line_and_edge_line(self, edges_line, line, node, prev_node):
+    def _update_line_and_edge_line(self, edges_line, line, node, prev_node, print_scope, print_type):
         edge_char = LINE_HORIZONTAL if prev_node and prev_node.parent == node.parent else " "
 
         node.left_col = len(line)
 
         line += math.floor(node.get_string_width() / 2 - len(repr(node.content)) / 2) * " "
         node.repr_col = len(line) + len(PADDING) + math.ceil(len(repr(node.content)) / 2)
-        content = PADDING + repr(node.content) + PADDING
+        scope = " " + str(node.scope) if print_scope and hasattr(node, "scope") else ""
+        node_type = ": " + str(node.type) if print_type and hasattr(node, "type") else ""
+        content = PADDING + repr(node.content) + scope + node_type + PADDING
         line += content
 
         edges_line += math.ceil(len(line) - len(edges_line) - len(content) / 2 - 1) * edge_char

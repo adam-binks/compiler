@@ -1,0 +1,12 @@
+program test
+
+begin
+
+    var sum := 2 + 3;
+
+	var n;
+	var first := 0;
+	var second := 1;
+
+	var b := first < second;
+end

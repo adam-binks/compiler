@@ -6,7 +6,7 @@ from typing import List, Tuple
 from parseerror import ParseError
 
 KEYWORDS_BOUNDARY_AFTER = ['program', 'begin', 'end', 'var', 'print', 'println', 'get', 'while', 'if', 'then', 'else',
-                           'or', 'and', 'not', 'true', 'false', 'procedure', 'return']
+                           'or', 'and', 'not', 'true', 'false', 'procedure', 'return', 'num', 'str', 'bool']
 KEYWORDS_NO_BOUNDARY_AFTER = [";", ":=", "+", "-", "*", "/", "(", ")", "<=", ">=", "==", "<", ">", ","]
 
 SPECIAL_TOKENS = [

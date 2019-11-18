@@ -2,7 +2,7 @@ program test
 
 begin
 
-    procedure add(var x, var y) begin
+    procedure add(num x, num y) begin
         return x + y;
     end
 

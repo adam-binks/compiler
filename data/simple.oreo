@@ -1,0 +1,12 @@
+program test
+
+begin
+
+    while (true) begin
+        var s := "loop daddy";
+        s := "loopy";
+    end;
+
+    var done := "the end";
+
+end

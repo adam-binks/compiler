@@ -8,4 +8,4 @@ RESET_COLOUR = "\033[0m"
 
 if not sys.stdout.isatty():
     # stdout is redirected - disable colours so files aren't clogged up with ugly colour codes
-    RED = BLUE = YELLOW = RESET_COLOUR = ""
+    pass# RED = BLUE = YELLOW = RESET_COLOUR = ""

@@ -2,13 +2,18 @@ program test
 
 begin
 
-    procedure add(var x, var y) begin
+    procedure add(num x, num y) begin
+        x := x + 1;
         return x + y;
     end
 
     procedure print_something()
     begin
         print 2 + 2;
+    end
+
+    procedure return_bool(bool cond) begin
+        return cond;
     end
 
     var sum := add(2, 3-1, "hello");
@@ -25,7 +30,9 @@ begin
 
     get n;
 
-    while ( first < (second > 32))
+    var this := return_bool(true);
+
+    while ( first < 32)
     begin
 
        if ( true ) then begin n := 5;  end
