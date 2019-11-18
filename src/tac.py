@@ -22,8 +22,13 @@ binary_ops = {
 }
 unary_ops = {
     "NOT": "not",
-    "Goto": "Goto",
     IF_FALSE_GOTO: IF_FALSE_GOTO
+}
+no_operands = {
+    "Goto": "Goto",
+    "GET": "ReadLine",
+    "PRINT": "PrintString",
+    "PRINTLN": "PrintStringLn"
 }
 
 COMBINER_OPERATORS = ["+", "-", "/", "*", "AND", "OR", "relative_operator", "simple_expr"]
@@ -105,6 +110,9 @@ class TacProgram:
         elif node.is_non_terminal("v") and node.has_child("var_assign"):
             self._compile_assignment(node.get_child("ID"), node.get_child("var_assign").get_child("expression"))
 
+        elif node.is_non_terminal("pr"):
+            node.result = self._compile_print_expression(node)
+
         if hasattr(node, "result"):
             assert isinstance(node.result, NodeResult)
         else:
@@ -113,8 +121,14 @@ class TacProgram:
     def _compile_print_expression(self, node: ParseTreeNode):
         if node.has_child("GET"):
             return self._add_instruction(
-                op=""
+                op="GET"
             )
+        else:
+            self._add_instruction(
+                result_var=node.get_child("expression").result,
+                op=node.get_a_child(["PRINT", "PRINTLN"]).content.token.name
+            )
+            return "NULL RESULT"
 
     def _compile_while_statement(self, node: ParseTreeNode):
         while_start_label = Label("while_start")
@@ -131,7 +145,7 @@ class TacProgram:
         self._add_instruction(
             arg1=condition_node.result,
             op=IF_FALSE_GOTO,
-            result=end_while_label
+            result_var=end_while_label
         )
 
         # the condition held, so execute the loop body
@@ -153,7 +167,7 @@ class TacProgram:
         self._add_instruction(
             arg1=condition_node.result,
             op=IF_FALSE_GOTO,
-            result=condition_is_false_label
+            result_var=condition_is_false_label
         )
 
         # the if statement was true
@@ -177,7 +191,7 @@ class TacProgram:
     def _add_goto_instruction(self, label):
         self._add_instruction(
             op="Goto",
-            result=label
+            result_var=label
         )
 
     def _compile_assignment(self, id_node, assign_node):
@@ -199,7 +213,7 @@ class TacProgram:
             # otherwise create a new one
             id_variable = TacVariable(id_variable_name)
             return self._add_instruction(
-                result=id_variable,
+                result_var=id_variable,
                 op="copy",
                 arg1=assign_node.result.get()
             )
@@ -296,22 +310,22 @@ class TacProgram:
                 arg2=equality
             )
 
-    def _add_instruction(self, result=None, op=None, arg1=None, arg2=None):
+    def _add_instruction(self, result_var=None, op=None, arg1=None, arg2=None):
         if isinstance(arg1, NodeResult):
             arg1 = arg1.get()
         if isinstance(arg2, NodeResult):
             arg2 = arg2.get()
 
-        if result is None:
-            result = self._new_variable()
+        if result_var is None:
+            result_var = self._new_variable()
         self.program.append(TacInstruction(
-            result=result,
+            result_var=result_var,
             op=op,
             arg1=arg1,
             arg2=arg2
         ))
 
-        return NodeResult(variable=result)
+        return NodeResult(variable=result_var)
 
 
 class NodeResult:
@@ -383,31 +397,31 @@ class TacInstruction:
     # > result=a, op=copy arg1=b
     # Goto L1;
     # > result=L1 op=Goto
-    def __init__(self, result, op=None, arg1=None, arg2=None):
+    def __init__(self, result_var, op=None, arg1=None, arg2=None):
         assert all(o is None or isinstance(o, str) or isinstance(o, TacVariable) or isinstance(o, Label)
-                   for o in [result, arg1, arg2])
+                   for o in [result_var, arg1, arg2])
         assert op is not None
 
-        self.result = result
+        self.result_var = result_var
         self.arg1 = arg1
         self.arg2 = arg2
         self.op = self.get_tac_op(op)
 
     def __repr__(self):
         if self.op == "copy":
-            return f"{self.result} = {self.arg1};"
+            return f"{self.result_var} = {self.arg1};"
 
         if self.op == IF_FALSE_GOTO:
-            return f"IfZ {self.arg1} Goto {self.result};"
+            return f"IfZ {self.arg1} Goto {self.result_var};"
 
         if self.op == "Goto":
-            return f"Goto {self.result};"
+            return f"Goto {self.result_var};"
 
         if self.op in unary_ops.values():
-            return f"{self.result} = {self.op} {self.arg1};"
+            return f"{self.result_var} = {self.op} {self.arg1};"
 
         if self.op in binary_ops.values():
-            return f"{self.result} = {self.arg1} {self.op} {self.arg2};"
+            return f"{self.result_var} = {self.arg1} {self.op} {self.arg2};"
 
         raise ValueError(f"Cannot __repr__ this TAC instruction")
 
