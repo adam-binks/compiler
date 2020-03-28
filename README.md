@@ -1,5 +1,5 @@
 # Oreo compiler
-A compiler for the toy language Oreo, written in Python
+A compiler for the toy language Oreo, written from the ground up in Python
 
 Process and features:
 
